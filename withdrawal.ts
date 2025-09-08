@@ -365,11 +365,17 @@ async function submitCollateralSignature(
     !existing ||
     existing.signers.every((s: PublicKey) => !s.equals(wallet.publicKey))
   ) {
+    console.log("collateralMessage.......",collateralMessage);
+    console.log("wallet.publicKey.toBuffer().........",wallet.publicKey.toBuffer());
+    console.log("collateralSignature..........", collateralSignature);
+
     const verifyIx = Ed25519Program.createInstructionWithPublicKey({
       message: collateralMessage,
       publicKey: wallet.publicKey.toBuffer(),
       signature: Buffer.from(collateralSignature),
     });
+
+  console.log("verifyIx.......", verifyIx);
 
     const submitIx = await program.methods
       .submitSignatures({
@@ -392,8 +398,8 @@ async function submitCollateralSignature(
       .instruction();
 
     const tx = new Transaction()
-      .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
-      .add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1 }))
+      // .add(ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }))
+      // .add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1 }))
       .add(verifyIx)
       .add(submitIx);
 
