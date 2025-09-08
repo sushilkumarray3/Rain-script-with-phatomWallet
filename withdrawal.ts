@@ -330,9 +330,15 @@ async function submitCollateralSignature(
 ) {
   if (!wallet.signMessage) throw new Error('Wallet missing signMessage');
 
-  const collateralMessageSalt: number[] = Array.from(randomBytes(32)).map(
-    Number,
-  );
+  // const collateralMessageSalt: number[] = Array.from(randomBytes(32)).map(
+  //   Number,
+  // );
+
+const collateralMessageSalt: number[] = [
+    82, 71, 99, 50, 89, 201, 143, 83, 165, 202, 90, 54, 240, 40, 145, 183, 139,
+    85, 193, 169, 194, 47, 128, 28, 81, 176, 219, 96, 201, 187, 229, 123,
+  ];
+
   const collateralMessage = Collateral.getWithdrawMessage(
     collateralAddress,
     wallet.publicKey,
@@ -345,6 +351,24 @@ async function submitCollateralSignature(
 
   // sign arbitrary bytes with Phantom
   const collateralSignature = await wallet.signMessage(collateralMessage);
+
+console.log(
+    'collateralSignature......signed by phantom wallet.........',
+    collateralSignature,
+  );
+
+// ..............by message signing by private key..............
+  
+  const secret = bs58.decode("<phantomWallet_privateKey>");
+  const signer = Keypair.fromSecretKey(secret);
+
+  const collateralSignatureByPrivateKey = nacl.sign.detached(
+    Uint8Array.from(collateralMessage),
+    signer.secretKey,
+  );
+
+  console.log('collateralSignature....signed by private key...............', collateralSignatureByPrivateKey);
+  //..............by message signing by private key..............
 
   const collateralSignatureAddress = Collateral.generateWithdrawCollateralPDA(
     collateralAddress,
